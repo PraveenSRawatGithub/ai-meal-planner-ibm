@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Meal Planner Chat</title>
-  <!-- Link to your stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meal Planner Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h1>AI Meal Planner</h1>
-      <button id="new-chat-btn">New Chat</button>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>AI Meal Planner</h1>
+            <button id="new-chat-btn">New Chat</button>
+        </div>
+        <div id="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Tell me what ingredients you have..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
-    <div id="chat-box"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your meal question..." autocomplete="off" required />
-      <button type="submit">Send</button>
-    </form>
-  </div>
-
-  <!-- Include your script only once, at the end of the body -->
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-
 </html>

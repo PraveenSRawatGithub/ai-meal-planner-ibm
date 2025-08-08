@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from gemini_api import get_recipe_suggestions, get_weekly_meal_plan, get_chat_response
-from flask import jsonify
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -14,7 +14,7 @@ def get_recipes():
     suggestions = get_recipe_suggestions(ingredients, budget)
     return render_template('index.html', ingredients=ingredients, suggestions=suggestions)
 
-@app.route('/meal_plan', methods=['GET', 'POST'])
+@app.route('/meal_plan', methods=['POST'])
 def meal_plan():
     ingredients = request.form['ingredients']
     budget = request.form.get('budget', '')

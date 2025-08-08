@@ -1,99 +1,114 @@
-const form = document.getElementById('chat-form');
-const input = document.getElementById('user-input');
-const chatBox = document.getElementById('chat-box');
-const newChatBtn = document.getElementById('new-chat-btn');
+document.addEventListener('DOMContentLoaded', () => {
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const chatBox = document.getElementById('chat-box');
+    const newChatBtn = document.getElementById('new-chat-btn');
 
-// Only run chat logic if on the chat page
-if (form && input && chatBox) {
-  let messages = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-  if (messages.length === 0) {
-    messages.push({
-      sender: 'ai',
-      text: "👋 Hi! I'm your meal planner assistant. What ingredients do you have today?"
-    });
-    localStorage.setItem("chatHistory", JSON.stringify(messages));
-  }
+    const initialMessage = {
+        sender: 'ai',
+        text: "👋 Hi! I'm your meal planner assistant. What ingredients do you have today?"
+    };
 
-  renderMessages();
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const userMsg = input.value.trim();
-    if (!userMsg) return;
-
-    appendMessage('user', userMsg);
-    input.value = '';
-
-    appendMessage('ai', '<em>Cooking...</em>');
-
-    try {
-      const response = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg })
-      });
-
-      const data = await response.json();
-
-      messages.pop(); // remove "Cooking..."
-      const formattedReply = formatReply(data.reply);
-      appendMessage('ai', formattedReply);
-
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-      messages.pop();
-      appendMessage('ai', "⚠️ Sorry, something went wrong.");
+    if (chatHistory.length === 0) {
+        chatHistory.push(initialMessage);
+        updateLocalStorage();
     }
-  });
 
-  if (newChatBtn) {
-    newChatBtn.addEventListener('click', () => {
-      if (confirm("Are you sure you want to start a new chat?")) {
-        localStorage.removeItem("chatHistory");
-        messages = [{
-          sender: 'ai',
-          text: "👋 Hi! I'm your meal planner assistant. What ingredients do you have today?"
-        }];
-        localStorage.setItem("chatHistory", JSON.stringify(messages));
-        renderMessages();
-      }
-    });
-  }
-
-  function appendMessage(sender, text) {
-    messages.push({ sender, text });
-    localStorage.setItem("chatHistory", JSON.stringify(messages));
     renderMessages();
-  }
 
-  function renderMessages() {
-    chatBox.innerHTML = '';
-    messages.forEach(({ sender, text }) => {
-      const bubble = document.createElement('div');
-      bubble.className = sender === 'user' ? 'chat-bubble user' : 'chat-bubble ai';
-      bubble.innerHTML = text;
-      chatBox.appendChild(bubble);
-    });
+    if (chatForm) {
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
 
-    chatBox.scrollTo({
-      top: chatBox.scrollHeight,
-      behavior: 'smooth'
-    });
-  }
+            appendMessage('user', userMessage);
+            userInput.value = '';
+            showTypingIndicator();
 
-  function formatReply(text) {
-    return text
-      .replace(/(?:\r\n|\r|\n){2,}/g, '<br><br>')
-      .replace(/(?:\r\n|\r|\n)/g, '<br>')
-      .replace(/###\s?\*\*(.*?)\*\*/g, '<h3>$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/^\s*[-*]\s+/gm, '<li>')
-      .replace(/<li>(.*?)<br>/g, '<li>$1</li>')
-      .replace(/<li>/g, '<ul><li>')
-      .replace(/<\/li>/g, '</li></ul>')
-      .replace(/<\/ul><ul>/g, '')
-      .replace(/---/g, '<hr>')
-      .replace(/<br>(\d+\.\s)/g, '<br><strong>$1</strong>');
-  }
-}
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+                const formattedReply = formatMarkdown(data.reply);
+                appendMessage('ai', formattedReply);
+
+            } catch (error) {
+                console.error("Error fetching AI response:", error);
+                removeTypingIndicator();
+                appendMessage('ai', "⚠️ Sorry, something went wrong. Please try again.");
+            }
+        });
+    }
+
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to start a new chat? This will clear your conversation.")) {
+                chatHistory = [initialMessage];
+                updateLocalStorage();
+                renderMessages();
+            }
+        });
+    }
+
+    function appendMessage(sender, text) {
+        chatHistory.push({ sender, text });
+        updateLocalStorage();
+        renderMessages();
+    }
+
+    function renderMessages() {
+        if (!chatBox) return;
+        chatBox.innerHTML = '';
+        chatHistory.forEach(({ sender, text }) => {
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `chat-bubble ${sender}`;
+            messageBubble.innerHTML = text;
+            chatBox.appendChild(messageBubble);
+        });
+        scrollToBottom();
+    }
+    
+    function showTypingIndicator() {
+        const typingBubble = document.createElement('div');
+        typingBubble.className = 'chat-bubble ai typing-indicator';
+        typingBubble.innerHTML = '<span></span><span></span><span></span>';
+        chatBox.appendChild(typingBubble);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const typingIndicator = chatBox.querySelector('.typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    function updateLocalStorage() {
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    }
+
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function formatMarkdown(text) {
+        let html = text
+            .replace(/### \*\*(.*?)\*\*/g, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^\s*[-*]\s+(.*)/gm, '<li>$1</li>')
+            .replace(/<\/li><li>/g, '</li><li>')
+            .replace(/<li>/g, '<ul><li>')
+            .replace(/<\/li>/g, '</li></ul>')
+            .replace(/<\/ul>(\s*<ul>)/g, '$1')
+            .replace(/\n/g, '<br>');
+        return html;
+    }
+});
