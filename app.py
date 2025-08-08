@@ -14,7 +14,7 @@ def get_recipes():
     suggestions = get_recipe_suggestions(ingredients, budget)
     return render_template('index.html', ingredients=ingredients, suggestions=suggestions)
 
-@app.route('/meal_plan', methods=['POST'])
+@app.route('/meal_plan', methods=['GET', 'POST'])
 def meal_plan():
     ingredients = request.form['ingredients']
     budget = request.form.get('budget', '')
@@ -26,6 +26,10 @@ def chat():
     user_input = request.json.get('message')
     reply = get_chat_response(user_input)
     return jsonify({'reply': reply})
+
+@app.route('/health')
+def health():
+    return "OK", 200
 
 if __name__ == '__main__':
     app.run(debug=True)

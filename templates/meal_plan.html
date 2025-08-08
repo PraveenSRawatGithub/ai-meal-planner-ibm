@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Weekly Meal Plan</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
+    <!-- Correct way to bust cache -->
+    <script src="{{ url_for('static', filename='script.js') }}?v=1"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
+
 </head>
+
 <body>
     <div class="container">
         <h1>Weekly Meal Plan</h1>
@@ -19,4 +25,5 @@
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

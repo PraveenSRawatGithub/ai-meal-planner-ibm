@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>AI Meal Planner Chat</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Link to your stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
 </head>
+
 <body>
   <div class="chat-container">
     <div class="chat-header">
@@ -18,6 +21,8 @@
     </form>
   </div>
 
+  <!-- Include your script only once, at the end of the body -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>
