@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weekly Meal Plan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Weekly Meal Plan</h1>
+        <div class="result">{{ plan|safe }}</div>
+
+        <h2>Grocery List</h2>
+        <div class="result">{{ grocery_list|safe }}</div>
+
+        <button onclick="saveToHistory()">Save Plan to History</button>
+        <a href="/">← Back</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
